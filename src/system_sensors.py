@@ -111,6 +111,7 @@ def updateSensors():
         + f'"last_message": "{get_last_message()}",'
         + f'"host_name": "{get_host_name()}",'
         + f'"host_ip": "{get_host_ip()}",'
+        + f'"WAN_ip": "{get_wan_ip()}",'
         + f'"host_os": "{get_host_os()}",'
         + f'"host_arch": "{get_host_arch()}"'
     )
@@ -197,7 +198,14 @@ def get_host_ip():
             return '127.0.0.1'
     finally:
         sock.close()
-
+        
+def get_wan_ip():
+    try:
+        ip = get('https://api.ipify.org').text
+        return ip
+    except:
+        return 'Unknown'
+    
 def get_host_os():
     try:     
         return OS_DATA["PRETTY_NAME"]
@@ -439,6 +447,19 @@ def send_config_message(mqttClient):
                 + f"\"device\":{{\"identifiers\":[\"{deviceName}_sensor\"],"
                 + f"\"name\":\"{deviceNameDisplay} Sensors\",\"model\":\"RPI {deviceNameDisplay}\", \"manufacturer\":\"RPI\"}},"
                 + f"\"icon\":\"mdi:lan\"}}",
+        qos=1,
+        retain=True,
+    )
+    mqttClient.publish(
+        topic=f"homeassistant/sensor/{deviceName}/WAN_ip/config",
+        payload=f"{{\"name\":\"{deviceNameDisplay} WAN Ip\","
+                + f"\"state_topic\":\"system-sensors/sensor/{deviceName}/state\","
+                + '"value_template":"{{value_json.WAN_ip}}",'
+                + f"\"unique_id\":\"{deviceName}_sensor_WAN_ip\","
+                + f"\"availability_topic\":\"system-sensors/sensor/{deviceName}/availability\","
+                + f"\"device\":{{\"identifiers\":[\"{deviceName}_sensor\"],"
+                + f"\"name\":\"{deviceNameDisplay} Sensors\",\"model\":\"RPI {deviceNameDisplay}\", \"manufacturer\":\"RPI\"}},"
+                + f"\"icon\":\"mdi:wan\"}}",
         qos=1,
         retain=True,
     )
