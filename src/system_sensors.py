@@ -11,6 +11,7 @@ from datetime import timedelta
 from re import findall
 from subprocess import check_output
 from rpi_bad_power import new_under_voltage
+from requests import get
 import paho.mqtt.client as mqtt
 import psutil
 import pytz
